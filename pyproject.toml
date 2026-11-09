@@ -1,0 +1,24 @@
+[project]
+name = "thevalley-multiagent-langgraph"
+version = "0.1.0"
+description = "Customer-service laboratory comparing four agent architectures"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=1.4.6",
+    "langchain-anthropic>=1.7.6",
+    "langchain-openai>=1.7.2",
+    "langgraph>=1.2.16",
+    "streamlit>=1.66.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/multiagent_store"]
+exclude = ["src/multiagent_store/exercises/student_solution.py"]
+
+[project.scripts]
+multiagent-store = "multiagent_store.cli:main"
