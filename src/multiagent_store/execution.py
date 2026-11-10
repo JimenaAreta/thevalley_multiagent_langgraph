@@ -9,6 +9,21 @@ from langchain_core.callbacks import BaseCallbackHandler
 from multiagent_store.agents.architectures import build, SolutionUnavailable
 from multiagent_store.agents.messages import message_text
 
+def to_jsonable(value):
+    """Make invocation parameters JSON-safe (e.g. a Pydantic class from with_structured_output)."""
+    if isinstance(value, type) and hasattr(value, 'model_json_schema'):
+        return value.model_json_schema()
+    if hasattr(value, 'model_dump'):
+        return value.model_dump(mode='json')
+    if isinstance(value, dict):
+        return {k: to_jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [to_jsonable(v) for v in value]
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    return repr(value)
+
+
 class MetricsCallback(BaseCallbackHandler):
     def __init__(self):
         self.calls = []
@@ -32,8 +47,8 @@ class MetricsCallback(BaseCallbackHandler):
                 'parent_run_id': str(kwargs.get('parent_run_id') or ''),
                 **self.context(kwargs),
                 'mensajes': [[m.model_dump(mode='json') for m in batch] for batch in messages],
-                'configuracion': {k: parameters[k] for k in
-                                  ('tools', 'tool_choice', 'response_format') if k in parameters},
+                'configuracion': to_jsonable({k: parameters[k] for k in
+                                              ('tools', 'tool_choice', 'response_format') if k in parameters}),
             })
 
     def on_llm_end(self, response, *, run_id, **kwargs):
