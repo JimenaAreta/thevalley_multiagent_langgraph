@@ -6,5 +6,3 @@ __pycache__/
 .env.*
 !.env.example
 .logfire/
-# Local instructor answers: never include these in the student repository.
-/src/multiagent_store/exercises/student_solution.py
